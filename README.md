@@ -129,19 +129,33 @@ docker-compose up -d
 
 ---
 
-## 🔗 Related Labs & Documentation
+## 🗺️ Roadmap — 앞으로의 연구 방향
 
-### 📚 기술 및 아키텍처 문서
-- [🛠️ Troubleshooting Guide](./docs/troubleshooting.md) - 트랜잭션 아웃박스 지연 및 중복 컨슘 문제 해결 기록
-- [📘 Tech Wiki: Transactional Outbox Pattern](./docs/decisions/ADR-001-transactional-outbox.md)
+본 랩의 완성도를 높이고 최신 엔터프라이즈 환경의 요구사항을 반영하기 위해 다음 과제들을 예정하고 있습니다.
 
-### 🌐 6 Master Labs Series
+- [ ] **Redis 기반 Outbox Caching**: DB 부하 감소 및 릴레이 스케줄링 성능 극대화 방안 연구
+- [ ] **Apache Kafka Streams 통합**: 실시간 데이터 집계(Aggregation) 및 KTable을 활용한 실시간 상태 조인 구현
+- [ ] **Spring Modulith 마이그레이션**: 이벤트 기반 아키텍처의 논리적 모듈 격리성 강화를 위한 모듈리스 패턴 적용
+- [ ] **고가용성 브로커 튜닝 테스트**: Chaos Engineering을 도입하여 브로커 노드 다운 시 메세지 유실 Zero 입증 시나리오 추가
+
+---
+
+## 🔗 Related Labs
+
+**TOP 6 Master Labs Series**
 - 🔒 [security-auth-core](../security-auth-core) - 완벽한 Stateless 인증 및 하이브리드 암호화
 - 🏗️ [infra-master-lab](../infra-master-lab) - Zero Trust 엣지 및 Hexagonal 인프라
 - 🗄️ [database-master-lab](../database-master-lab) - 데이터베이스 최적화 및 안정성
 - ⚡ [realtime-comm-lab](../realtime-comm-lab) - 실시간 통신 및 웹소켓
 - 🚀 **event-streaming-lab (Current)** - 분산 이벤트 스트리밍 시스템
-- 🧠 ai-agent-brain-lab (Next) - AI Agent RAG 및 LLM 인퍼런스 코어
+- 🧠 [ai-agent-brain-lab](../ai-agent-brain-lab) - AI Agent RAG 및 LLM 인퍼런스 코어
+
+---
+
+## 📚 Documentation
+
+- [🛠️ Troubleshooting Guide](./docs/troubleshooting.md) - 트랜잭션 아웃박스 지연 및 중복 컨슘 문제 해결 기록
+- [📘 Tech Wiki: Transactional Outbox Pattern](./docs/decisions/ADR-001-transactional-outbox.md)
 
 ---
 
