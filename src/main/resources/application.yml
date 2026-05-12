@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: event-streaming-lab
+
+  # ─────────────────────────────────────────────────────────
+  # 🗄️ Database 설정 (MySQL)
+  # ─────────────────────────────────────────────────────────
+  datasource:
+    url: jdbc:mysql://localhost:3306/eventdb?serverTimezone=UTC&characterEncoding=UTF-8
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # ─────────────────────────────────────────────────────────
+  # 📨 Kafka 설정
+  # ─────────────────────────────────────────────────────────
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all # 모든 복제본까지 성공 시 OK (신뢰성 중심)
+      properties:
+        enable.idempotence: true # 멱등성 프로듀서 활성화
+    consumer:
+      group-id: lab-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+logging:
+  level:
+    org.springframework.kafka: INFO
+    com.hooney.lab.eventstream: DEBUG

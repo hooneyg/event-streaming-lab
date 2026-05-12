@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # =========================================================
+  # 🌊 Apache Kafka Cluster (Bitnami)
+  # =========================================================
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: kafka-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - event-network
+
+  kafka:
+    image: bitnami/kafka:3.6
+    container_name: kafka-broker
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+    networks:
+      - event-network
+
+  # =========================================================
+  # 🗄️ MySQL Database (Outbox Table Store)
+  # =========================================================
+  mysql:
+    image: mysql:8.0
+    container_name: event-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_DATABASE=eventdb
+      - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - event-network
+
+networks:
+  event-network:
+    driver: bridge
