@@ -6,11 +6,13 @@
 > **"분산 시스템에서의 데이터 정합성 파괴를 코드로 막다."**  
 > 본 프로젝트는 Apache Kafka를 활용하여 엔터프라이즈 급 이벤트 기반 아키텍처(EDA)를 설계하고, 특히 분산 환경에서 가장 치명적인 **'메시지 유실'**과 **'중복 처리'** 문제를 해결하는 핵심 패턴을 증명합니다.
 
-![CI](https://img.shields.io/badge/CI-passing-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)
-![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![Kafka](https://img.shields.io/badge/Apache%20Kafka-3.6-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+  [![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.6-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
+  [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+  [![Kafka](https://img.shields.io/badge/Apache%20Kafka-3.6-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+  [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+  [![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen?style=for-the-badge)](https://github.com/hooneyg/event-streaming-lab)
+  [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/hooneyg/event-streaming-lab/actions)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
@@ -124,6 +126,22 @@ docker-compose up -d
 ```
 
 - **`OutboxPatternIntegrationTest`**: 주문 생성 -> 아웃박스 적재 -> 리레이 전송 -> 소비자 수신 및 멱등성 기록까지의 전 과정을 자동화된 테스트로 입증합니다.
+
+---
+
+## 🔗 Related Labs & Documentation
+
+### 📚 기술 및 아키텍처 문서
+- [🛠️ Troubleshooting Guide](./docs/troubleshooting.md) - 트랜잭션 아웃박스 지연 및 중복 컨슘 문제 해결 기록
+- [📘 Tech Wiki: Transactional Outbox Pattern](./docs/decisions/ADR-001-transactional-outbox.md)
+
+### 🌐 6 Master Labs Series
+- 🔒 [security-auth-core](../security-auth-core) - 완벽한 Stateless 인증 및 하이브리드 암호화
+- 🏗️ [infra-master-lab](../infra-master-lab) - Zero Trust 엣지 및 Hexagonal 인프라
+- 🗄️ [database-master-lab](../database-master-lab) - 데이터베이스 최적화 및 안정성
+- ⚡ [realtime-comm-lab](../realtime-comm-lab) - 실시간 통신 및 웹소켓
+- 🚀 **event-streaming-lab (Current)** - 분산 이벤트 스트리밍 시스템
+- 🧠 ai-agent-brain-lab (Next) - AI Agent RAG 및 LLM 인퍼런스 코어
 
 ---
 
