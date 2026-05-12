@@ -9,7 +9,7 @@ version = '1.0.0-SNAPSHOT'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(21) // 2026년 기준 최신 LTS 버전인 Java 21 사용
     }
 }
 
@@ -25,34 +25,34 @@ repositories {
 
 dependencies {
     // ═══════════════════════════════════════════════════════
-    // 🌊 Core & Web
+    // 🌊 Core & Web: 스프링 부트 기본 웹 설정
     // ═══════════════════════════════════════════════════════
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     
     // ═══════════════════════════════════════════════════════
-    // 📨 Event Streaming (Kafka)
+    // 📨 Event Streaming (Kafka): 카프카 연동 핵심 라이브러리
     // ═══════════════════════════════════════════════════════
     implementation 'org.springframework.kafka:spring-kafka'
     
     // ═══════════════════════════════════════════════════════
-    // 🗄️ Persistence (Outbox Pattern)
+    // 🗄️ Persistence (Outbox Pattern): DB 저장을 위한 JPA 및 MySQL
     // ═══════════════════════════════════════════════════════
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'com.mysql:mysql-connector-j'
     
     // ═══════════════════════════════════════════════════════
-    // 🛠️ Utilities
+    // 🛠️ Utilities: 개발 생산성 향상을 위한 도구들
     // ═══════════════════════════════════════════════════════
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.core:jackson-databind' // JSON 직렬화/역직렬화용
     
     // ═══════════════════════════════════════════════════════
-    // 🧪 Testing
+    // 🧪 Testing: 신뢰성 있는 코드를 위한 테스트 라이브러리
     // ═══════════════════════════════════════════════════════
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'org.springframework.kafka:spring-kafka-test' // 카프카 테스트 유틸리티
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'

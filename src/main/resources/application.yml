@@ -3,7 +3,7 @@ spring:
     name: event-streaming-lab
 
   # ─────────────────────────────────────────────────────────
-  # 🗄️ Database 설정 (MySQL)
+  # 🗄️ Database 설정 (MySQL) - Outbox 및 Processed 이력 저장용
   # ─────────────────────────────────────────────────────────
   datasource:
     url: jdbc:mysql://localhost:3306/eventdb?serverTimezone=UTC&characterEncoding=UTF-8
@@ -13,32 +13,32 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: update # 엔티티 기반 자동 스키마 생성 (개발용)
+    show-sql: true     # 실행 쿼리 출력
     properties:
       hibernate:
         format_sql: true
 
   # ─────────────────────────────────────────────────────────
-  # 📨 Kafka 설정
+  # 📨 Kafka 설정 - 신뢰성 있는 메시징을 위한 튜닝
   # ─────────────────────────────────────────────────────────
   kafka:
     bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      acks: all # 모든 복제본까지 성공 시 OK (신뢰성 중심)
+      acks: all # 모든 복제본까지 성공 시 OK (메시지 손실 방지 최상위 설정)
       properties:
-        enable.idempotence: true # 멱등성 프로듀서 활성화
+        enable.idempotence: true # 멱등성 프로듀서 활성화 (중복 발행 방지)
     consumer:
       group-id: lab-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "*"
+        spring.json.trusted.packages: "*" # 모든 패키지의 JSON 역직렬화 허용
 
 logging:
   level:
     org.springframework.kafka: INFO
-    com.hooney.lab.eventstream: DEBUG
+    com.hooney.lab.eventstream: DEBUG # 우리 로직의 디버깅 로그 확인용
