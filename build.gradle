@@ -52,7 +52,12 @@ dependencies {
     // 🧪 Testing: 신뢰성 있는 코드를 위한 테스트 라이브러리
     // ═══════════════════════════════════════════════════════
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.kafka:spring-kafka-test' // 카프카 테스트 유틸리티
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers' // 스프링 부트 Testcontainers 통합
+    testImplementation 'org.testcontainers:kafka'                          // 카프카 컨테이너
+    testImplementation 'org.testcontainers:mysql'                          // MySQL 컨테이너
+    testImplementation 'org.testcontainers:junit-jupiter'                 // JUnit 5 연동
+    testImplementation 'org.awaitility:awaitility'                        // 비동기 검증 도구
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
