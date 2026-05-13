@@ -1,171 +1,176 @@
+<div align="center">
+
 <img src="https://capsule-render.vercel.app/api?type=waving&color=C71585&height=200&section=header&text=Event%20Streaming%20Lab&fontSize=50&animation=fadeIn&fontAlignY=38&fontColor=FFFFFF" />
 
----
-## 🌊 Event Streaming Lab (이벤트 스트림 분산 처리 연구소)
+<h3>🌊 Reliable Event-driven Architecture with Transactional Outbox and Idempotent Consumer</h3>
 
-> **"분산 시스템에서의 데이터 정합성 파괴를 코드로 막다."**  
-> 본 프로젝트는 Apache Kafka를 활용하여 엔터프라이즈 급 이벤트 기반 아키텍처(EDA)를 설계하고, 특히 분산 환경에서 가장 치명적인 **'메시지 유실'**과 **'중복 처리'** 문제를 해결하는 핵심 패턴을 증명합니다.
+<p>
+  <img src="https://img.shields.io/badge/Java-21_LTS-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" />
+  <img src="https://img.shields.io/badge/Spring_Boot-4.0.6-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" />
+  <img src="https://img.shields.io/badge/Apache_Kafka-3.6-231F20?style=for-the-badge&logo=apachekafka&logoColor=white" />
+  <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Testcontainers-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+</p>
 
-  [![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.6-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)](https://spring.io/projects/spring-boot)
-  [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
-  [![Kafka](https://img.shields.io/badge/Apache%20Kafka-3.6-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
-  [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
-  [![Coverage](https://img.shields.io/badge/Coverage-95%25-brightgreen?style=for-the-badge)](https://github.com/hooneyg/event-streaming-lab)
-  [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/hooneyg/event-streaming-lab/actions)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p>
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" />
+  <img src="https://img.shields.io/badge/Coverage-95%25-brightgreen?style=flat-square" />
+  <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square&logo=githubactions&logoColor=white" />
+</p>
 
----
-
-## 📌 Problem — 왜 연구가 필요한가?
-
-분산 시스템에서 비즈니스 로직(DB 업데이트)과 알림/전파(메시지 발행)는 물리적으로 분리된 리소스를 사용합니다. 이때 다음과 같은 **데이터 정합성 결함**이 발생할 수 있습니다:
-
-1.  **메시지 유실(Lost Message)**: 주문 DB 저장은 성공했으나, 네트워크 장애나 브로커 다운으로 카프카 메시지가 발행되지 않는 경우.
-2.  **데이터 불일치**: 카프카 전송은 성공했으나, DB 트랜잭션이 최종적으로 롤백되는 경우.
-3.  **중복 처리(Duplicate Processing)**: At-least-once 전송 전략으로 인해 동일한 메시지가 소비자에게 두 번 전달되는 경우.
+</div>
 
 ---
 
-## 🏗️ Architecture — 어떻게 설계했는가?
+> DB 트랜잭션과 Kafka 메시지 발행 사이의 정합성 문제를 Transactional Outbox와 Idempotent Consumer로 방어하는 이벤트 기반 아키텍처 레퍼런스입니다.  
+> 메시지 유실, 데이터 불일치, 중복 처리를 실제 컨테이너 기반 통합 테스트로 검증합니다.
 
-본 랩에서는 **Transactional Outbox Pattern**을 통해 DB와 Kafka 간의 원자성(Atomicity)을 보장합니다.
+---
+
+## 📌 Problem — 왜 만들었는가
+
+- **메시지 유실**: 주문 저장은 성공했지만 Kafka 발행이 실패하면 다른 서비스가 상태 변경을 알 수 없습니다.
+- **데이터 불일치**: Kafka 발행은 성공했지만 DB 트랜잭션이 롤백되면 존재하지 않는 이벤트가 전파됩니다.
+- **중복 처리**: at-least-once 전송에서는 동일 메시지가 여러 번 소비될 수 있습니다.
+- **브로커 장애 대응**: Kafka가 일시적으로 불안정해도 이벤트 발행을 재시도할 수 있어야 합니다.
+
+Event Streaming Lab은 로컬 트랜잭션으로 outbox를 저장하고, relay가 Kafka로 안전하게 전송하며, consumer가 처리 이력을 기반으로 중복 처리를 방어하는 구조를 제시합니다.
+
+## 🏗️ Architecture — 어떻게 설계했는가
 
 ```mermaid
 sequenceDiagram
-    participant OS as OrderService (Producer)
-    participant DB as MySQL (Order & Outbox)
-    participant RL as OutboxEventRelay (Scheduler)
-    participant KF as Apache Kafka
-    participant OC as OrderConsumer (Idempotent)
+    autonumber
+    participant OS as OrderService
+    participant DB as MySQL Order & Outbox
+    participant Relay as OutboxEventRelay
+    participant Kafka as Apache Kafka
+    participant Consumer as Idempotent Consumer
 
-    Note over OS, DB: [Phase 1: Transactional Capture]
-    OS->>DB: 1. 주문 저장 (orders)
-    OS->>DB: 2. 이벤트 적재 (outbox)
-    DB-->>OS: Transaction Commit (Atomic)
-
-    Note over RL, KF: [Phase 2: Reliable Delivery]
-    loop 5 seconds delay
-        RL->>DB: 3. INIT 상태 이벤트 조회
-        RL->>KF: 4. Kafka 메시지 발행 (lab.order)
-        KF-->>RL: Ack (Success)
-        RL->>DB: 5. 상태 변경 (PUBLISHED)
+    OS->>DB: Save order and outbox event in one transaction
+    DB-->>OS: Commit
+    loop scheduled relay
+        Relay->>DB: Find INIT events
+        Relay->>Kafka: Publish event
+        Kafka-->>Relay: Ack
+        Relay->>DB: Mark PUBLISHED
     end
-
-    Note over KF, OC: [Phase 3: Idempotent Consumption]
-    KF->>OC: 6. 메시지 수신
-    OC->>DB: 7. 멱등성 이력 확인 (processed_events)
-    OC->>OC: 8. 비즈니스 로직 수행
-    OC->>DB: 9. 처리 이력 저장
+    Kafka->>Consumer: Deliver event
+    Consumer->>DB: Check processed_events
+    Consumer->>Consumer: Execute business logic once
+    Consumer->>DB: Save processed event id
 ```
-
----
 
 ## 📂 Project Structure
 
-### 🏗️ Architecture Layers
-| Layer | Path | Description |
-| :--- | :--- | :--- |
-| **Application** | `application/` | Transactional Outbox 핵심 로직 및 스케줄러(Relay) |
-| **Domain** | `domain/` | 비즈니스 엔티티 (Order, Outbox, ProcessedEvent) |
-| **Infrastructure** | `infrastructure/` | Kafka Consumer 및 JPA 영속성 레이어 구현체 |
-
-### 🌳 Directory Tree
 ```text
 event-streaming-lab/
-├── 🛡️ .github/workflows/ci.yml        # CI/CD 파이프라인 (GitHub Actions)
-├── 📦 src/main/java/com/hooney/lab/
-│   └── eventstream/
-│       ├── 🛠️ application/           # 서비스 및 중계기(Relay) 구현
-│       ├── 🌐 domain/                # 도메인 모델 및 아웃박스 상태 관리
-│       └── 🔌 infrastructure/        # 메시징(Kafka) 및 persistence 레이어
-├── ⚙️ src/main/resources/            # Kafka 튜닝 및 DB 커넥션 설정
-├── 🧪 src/test/java/                # Testcontainers 기반 통합 테스트
-├── 🐳 Dockerfile                     # 멀티 스테이지 빌드 최적화 설정
-└── 🛠️ docker-compose.yml             # Kafka, MySQL 컨테이너 인프라 구성
+├── .github/workflows/ci.yml                   # ⚙️ Kafka/MySQL 통합 테스트 CI 파이프라인
+├── src/main/java/com/hooney/lab/eventstream/
+│   ├── application/                           # 🚀 OrderService, Outbox relay, use case 흐름
+│   ├── domain/                                # 🧩 Order, OutboxEvent, ProcessedEvent 도메인
+│   └── infrastructure/                        # 🔌 Kafka consumer/producer, JPA persistence
+├── src/main/resources/                        # ⚙️ Kafka producer/consumer, DB 설정
+├── src/test/java/                             # 🧪 Testcontainers 기반 E2E 통합 테스트
+├── Dockerfile                                 # 🐳 애플리케이션 컨테이너 이미지 빌드
+├── docker-compose.yml                         # 🐳 Kafka, MySQL, App 로컬 실행 환경
 ```
 
----
+## 🎯 Key Features & Evidence — 무엇을 증명하는가
 
-## ⚡ Key Features — 무엇을 증명하는가?
+### 1. Transactional Outbox Pattern
 
-### 1. Transactional Outbox Pattern (발행 보장)
-- **Local Transactional Consistency**: JPA를 활용하여 비즈니스 데이터와 메시지 페이로드를 하나의 로컬 트랜잭션으로 묶어 저장합니다.
-- **At-least-once Delivery**: 스케줄러 기반의 Relay가 전송 성공 확인 후 상태를 업데이트하여, 브로커가 일시 중단되어도 이벤트 발행을 보장합니다.
+| Risk | Strategy | Evidence |
+| :--- | :--- | :--- |
+| DB 저장 후 메시지 유실 | 주문과 outbox를 하나의 로컬 트랜잭션으로 저장 | `OutboxPatternIntegrationTest` |
+| Kafka 일시 장애 | INIT 상태 이벤트를 relay가 재조회 후 재시도 | Scheduler integration |
+| 발행 상태 추적 불가 | outbox status를 INIT/PUBLISHED로 관리 | Outbox entity |
 
-### 2. Idempotent Consumer (중복 방어)
-- **Duplicate Detection**: 수신한 메시지의 고유 식별자를 `processed_events` 테이블에서 조회하여 이미 처리된 과업인지 검증합니다.
-- **Consistency**: 재시도로 인해 동일 메시지가 수만 번 들어와도 시스템 상태는 단 한 번만 변경됨을 보장합니다.
+**Evidence**
+
+- 비즈니스 데이터와 이벤트 페이로드를 하나의 DB 트랜잭션으로 저장하여 원자성을 보장합니다.
+- Kafka 발행 성공 ack 이후 outbox 상태를 변경해 발행 완료 여부를 추적합니다.
+
+### 2. Idempotent Consumer
+
+| Feature | Description |
+| :--- | :--- |
+| **Processed Event Table** | 이미 처리한 이벤트 ID를 저장해 중복 처리 방지 |
+| **At-least-once Compatible** | Kafka 재전송 상황에서도 비즈니스 로직은 한 번만 실행 |
+| **Consistency First** | 메시지 중복보다 상태 불일치를 더 위험한 문제로 보고 처리 이력을 남김 |
+
+**Evidence**
+
+- 동일 이벤트가 반복 전달되어도 `processed_events` 조회로 중복 실행을 차단합니다.
+- Consumer 테스트에서 수신, 이력 확인, 비즈니스 처리, 이력 저장 흐름을 검증합니다.
 
 ### 3. Enterprise Reliability Tuning
-- **Producer Acks (all)**: 카프카의 모든 복제본이 메시지를 기록했음을 확인하는 설정을 통해 신뢰성을 극대화했습니다.
-- **Idempotent Producer**: 프로듀서 레벨의 멱등성 설정을 통해 카프카 자체의 중복 발행 가능성도 차단했습니다.
 
----
+| Setting | Purpose |
+| :--- | :--- |
+| **acks=all** | 모든 replica 기록 확인 후 성공 처리 |
+| **Idempotent Producer** | Producer retry 과정의 중복 발행 가능성 축소 |
+| **Testcontainers** | 실제 Kafka/MySQL에 가까운 격리 통합 테스트 |
 
-## 🚀 Quick Start — 어떻게 실행하는가?
+**Evidence**
 
-본 랩은 **Docker Compose**를 통해 즉시 인프라를 가동할 수 있습니다.
+- 단순 mock 테스트가 아니라 Kafka와 MySQL 컨테이너 기반으로 end-to-end 흐름을 검증합니다.
+- 장애 가능성이 높은 분산 시스템 경계를 테스트 환경 안으로 끌어옵니다.
+
+## 🚀 Quick Start — 어떻게 실행하는가
 
 ```bash
-# 1. 인프라 가동 (Kafka, MySQL)
-docker-compose up -d
+git clone https://github.com/hooneyg/event-streaming-lab.git
+cd event-streaming-lab
 
-# 2. 애플리케이션 빌드 및 실행
+docker-compose up -d
 ./gradlew bootRun
 ```
 
----
-
-## 🧪 Tests — 어떻게 검증했는가?
-
-**Testcontainers**를 활용하여 격리된 실제 컨테이너 환경에서 전체 사이클을 검증합니다.
+## 🧪 Tests — 어떻게 검증했는가
 
 ```bash
-# 통합 테스트 실행
 ./gradlew test
 ```
 
-- **`OutboxPatternIntegrationTest`**: 주문 생성 -> 아웃박스 적재 -> 리레이 전송 -> 소비자 수신 및 멱등성 기록까지의 전 과정을 자동화된 테스트로 입증합니다.
+| Test Target | What It Proves |
+| :--- | :--- |
+| Outbox integration | 주문 저장부터 outbox 적재까지의 로컬 트랜잭션 |
+| Relay flow | INIT 이벤트 조회, Kafka 발행, PUBLISHED 상태 변경 |
+| Consumer idempotency | 중복 메시지 수신 시 단 한 번만 처리 |
+| Testcontainers environment | 실제 Kafka/MySQL 기반 통합 검증 |
 
----
+## 🧭 Roadmap
 
-## 🗺️ Roadmap — 앞으로의 연구 방향
-
-본 랩의 완성도를 높이고 최신 엔터프라이즈 환경의 요구사항을 반영하기 위해 다음 과제들을 예정하고 있습니다.
-
-- [ ] **Redis 기반 Outbox Caching**: DB 부하 감소 및 릴레이 스케줄링 성능 극대화 방안 연구
-- [ ] **Apache Kafka Streams 통합**: 실시간 데이터 집계(Aggregation) 및 KTable을 활용한 실시간 상태 조인 구현
-- [ ] **Spring Modulith 마이그레이션**: 이벤트 기반 아키텍처의 논리적 모듈 격리성 강화를 위한 모듈리스 패턴 적용
-- [ ] **고가용성 브로커 튜닝 테스트**: Chaos Engineering을 도입하여 브로커 노드 다운 시 메세지 유실 Zero 입증 시나리오 추가
-
----
+- [ ] Redis 기반 Outbox caching
+- [ ] Kafka Streams 통합
+- [ ] Spring Modulith 마이그레이션
+- [ ] 브로커 장애 Chaos Engineering 시나리오
+- [ ] Saga pattern 확장
 
 ## 🔗 Related Labs
 
-**TOP 6 Master Labs Series**
-- 🔒 [security-auth-core](../security-auth-core) - 완벽한 Stateless 인증 및 하이브리드 암호화
-- 🏗️ [infra-master-lab](../infra-master-lab) - Zero Trust 엣지 및 Hexagonal 인프라
-- 🗄️ [database-master-lab](../database-master-lab) - 데이터베이스 최적화 및 안정성
-- ⚡ [realtime-comm-lab](../realtime-comm-lab) - 실시간 통신 및 웹소켓
-- 🚀 **event-streaming-lab (Current)** - 분산 이벤트 스트리밍 시스템
-- 🧠 [ai-agent-brain-lab](../ai-agent-brain-lab) - AI Agent RAG 및 LLM 인퍼런스 코어
-
----
+| Related Lab | 연결 이유 |
+| :--- | :--- |
+| `security-auth-core` | 이벤트 API와 내부 호출의 인증/인가 기준 |
+| `infra-master-lab` | Kafka/MySQL 운영 환경과 배포 기준 |
+| `database-master-lab` | Outbox, 처리 이력, 트랜잭션 저장소 기준 |
+| `realtime-comm-lab` | 이벤트 결과를 실시간 사용자 알림으로 확장 |
+| `ai-agent-brain-lab` | 비동기 AI 작업과 이벤트 기반 알림 기준 |
 
 ## 📚 Documentation
 
-- [🛠️ Troubleshooting Guide](./docs/troubleshooting.md) - 트랜잭션 아웃박스 지연 및 중복 컨슘 문제 해결 기록
-- [📘 Tech Wiki: Transactional Outbox Pattern](./docs/decisions/ADR-001-transactional-outbox.md)
-
----
+- [Troubleshooting Guide](./docs/troubleshooting.md)
+- [ADR-001: Transactional Outbox Pattern](./docs/decisions/ADR-001-transactional-outbox.md)
 
 ## 📄 License
+
 This project is licensed under the [MIT License](./LICENSE).
 
 ---
 
 <div align="center">
-<b>Built with ❤️ by <a href="https://github.com/hooneyg">Hooney</a> — AI FullStack Developer & Enterprise Solution Architect</b>
+<b>Built by <a href="https://github.com/hooneyg">Hooney</a> — AI FullStack Developer & Enterprise Solution Architect</b>
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=C71585&height=100&section=footer" />
 </div>
