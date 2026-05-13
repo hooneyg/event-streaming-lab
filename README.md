@@ -117,18 +117,42 @@ event-streaming-lab/
 - 단순 mock 테스트가 아니라 Kafka와 MySQL 컨테이너 기반으로 end-to-end 흐름을 검증합니다.
 - 장애 가능성이 높은 분산 시스템 경계를 테스트 환경 안으로 끌어옵니다.
 
-## 🚀 Quick Start — 어떻게 실행하는가
+## 🚀 Quick Start — 실행 방법
 
+이 프로젝트는 Docker Compose를 통해 애플리케이션과 모든 인프라(Kafka, MySQL)를 한 번에 실행할 수 있도록 구성되어 있습니다.
+
+### 1. 인프라 및 애플리케이션 실행
+프로젝트 루트에서 다음 명령어를 입력하세요:
 ```bash
-git clone https://github.com/hooneyg/event-streaming-lab.git
-cd event-streaming-lab
-
-docker-compose up -d
-./gradlew bootRun
+# 전체 서비스 빌드 및 실행 (백그라운드)
+docker-compose up -d --build
 ```
 
-## 🧪 Tests — 어떻게 검증했는가
+### 2. 주요 대시보드 및 도구 접속 정보
+서비스가 정상적으로 구동되면 브라우저를 통해 다음 도구들에 접속할 수 있습니다:
 
+| 서비스 명 | URL | 용도 |
+| :--- | :--- | :--- |
+| **Kafka UI** | [http://localhost:8090](http://localhost:8090) | 토픽 모니터링, 메시지 확인, 소비자 그룹 상태 확인 |
+| **Swagger UI** | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) | API 테스트 및 명세 확인 |
+| **MySQL** | `localhost:3306` | Outbox 및 비즈니스 데이터 확인 (ID/PW: root/root) |
+
+### 3. 간단한 API 테스트
+Swagger UI에 접속하거나 `curl`을 통해 주문 이벤트를 발생시켜 보세요:
+```bash
+curl -X POST http://localhost:8080/api/v1/orders \
+     -H "Content-Type: application/json" \
+     -d '{"productName": "MacBook M5 Max", "amount": 6800000, "customerEmail": "[EMAIL_ADDRESS]"}'
+```
+
+### 4. 종료 방법
+```bash
+docker-compose down
+```
+
+## 🧪 Tests — 검증 방법
+
+로컬 환경에 Java 21이 설치되어 있다면 다음 명령어로 테스트를 수행할 수 있습니다. (Testcontainers가 사용되므로 Docker/Podman이 구동 중이어야 합니다.)
 ```bash
 ./gradlew test
 ```

@@ -54,14 +54,8 @@ public class OutboxEventRelay {
                 String topic = "lab." + outbox.getAggregateType().toLowerCase();
                 
                 // Key값으로 aggregateId를 주어 동일 주문에 대한 이벤트 순서 보장 유도
-                kafkaTemplate.send(topic, String.valueOf(outbox.getAggregateId()), outbox.getPayload())
-                        .whenComplete((result, ex) -> {
-                            if (ex == null) {
-                                log.debug(">>>> [OutboxRelay] Kafka 전송 성공 (ID: {})", outbox.getId());
-                            } else {
-                                log.error(">>>> [OutboxRelay] Kafka 전송 실패 (ID: {})", outbox.getId(), ex);
-                            }
-                        });
+                kafkaTemplate.send(topic, String.valueOf(outbox.getAggregateId()), outbox.getPayload()).get();
+
 
                 // 3. 전송 시도 후 상태 변경 (성공/실패 여부에 따라 상태 관리 고도화 가능)
                 outbox.published();

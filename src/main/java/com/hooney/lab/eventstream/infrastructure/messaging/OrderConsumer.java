@@ -40,6 +40,7 @@ public class OrderConsumer {
     public void consume(ConsumerRecord<String, String> record) {
         String eventId = record.key(); // 이벤트 고유 식별자 (Outbox ID 또는 UUID)
         log.info(">>>> [OrderConsumer] 메시지 수신 성공: (Key: {}, Topic: {})", eventId, record.topic());
+        System.out.println("🚨🚨🚨 [OrderConsumer] 메시지 수신 성공: " + eventId);
 
         // 1. 멱등성 체크: 이미 처리된 이벤트인지 DB 조회
         if (processedEventRepository.existsById(eventId)) {

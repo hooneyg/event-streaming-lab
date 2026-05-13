@@ -6,7 +6,7 @@ spring:
   # 🗄️ Database 설정 (MySQL) - Outbox 및 Processed 이력 저장용
   # ─────────────────────────────────────────────────────────
   datasource:
-    url: jdbc:mysql://localhost:3306/eventdb?serverTimezone=UTC&characterEncoding=UTF-8
+    url: jdbc:mysql://127.0.0.1:3306/eventdb?serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,10 +23,10 @@ spring:
   # 📨 Kafka 설정 - 신뢰성 있는 메시징을 위한 튜닝
   # ─────────────────────────────────────────────────────────
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: 127.0.0.1:9094
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all # 모든 복제본까지 성공 시 OK (메시지 손실 방지 최상위 설정)
       properties:
         enable.idempotence: true # 멱등성 프로듀서 활성화 (중복 발행 방지)
@@ -34,7 +34,7 @@ spring:
       group-id: lab-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       properties:
         spring.json.trusted.packages: "*" # 모든 패키지의 JSON 역직렬화 허용
 
@@ -42,3 +42,17 @@ logging:
   level:
     org.springframework.kafka: INFO
     com.hooney.lab.eventstream: DEBUG # 우리 로직의 디버깅 로그 확인용
+
+# ─────────────────────────────────────────────────────────
+# 📖 SpringDoc OpenAPI (Swagger) 설정
+# ─────────────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true # 요청 처리 시간 표시
+    groups-order: DESC             # 그룹 정렬 순서
+    operations-sorter: method      # API 메서드별 정렬 (GET, POST 등)
+    disable-swagger-default-url: true
+    doc-expansion: list            # 기본적으로 목록을 펼쳐서 표시
