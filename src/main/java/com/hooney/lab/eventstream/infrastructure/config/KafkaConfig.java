@@ -2,6 +2,7 @@ package com.hooney.lab.eventstream.infrastructure.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,10 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.CommonErrorHandler;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -99,9 +104,27 @@ public class KafkaConfig {
      * 이 빈이 등록되어 있어야 통합 테스트 및 실제 런타임에서 리스너가 정상적으로 초기화됩니다.
      */
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
+    public CommonErrorHandler errorHandler(KafkaTemplate<String, String> kafkaTemplate) {
+        // 실패 시 lab.order.DLQ 토픽으로 라우팅되도록 설정 (0번 파티션 지정)
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
+                (record, ex) -> new TopicPartition(record.topic() + ".DLQ", 0));
+        
+        // 최대 3회 재시도, 1초(1000ms) 대기 백오프 설정
+        FixedBackOff backOff = new FixedBackOff(1000L, 3L);
+        
+        return new DefaultErrorHandler(recoverer, backOff);
+    }
+
+    /**
+     * @KafkaListener 애노테이션이 부착된 메서드를 감지하여 비동기 메시지 수신 컨테이너를 생성하는 팩토리입니다.
+     * 이 빈이 등록되어 있어야 통합 테스트 및 실제 런타임에서 리스너가 정상적으로 초기화됩니다.
+     */
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
+            KafkaTemplate<String, String> kafkaTemplate) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
+        factory.setCommonErrorHandler(errorHandler(kafkaTemplate));
         return factory;
     }
 }

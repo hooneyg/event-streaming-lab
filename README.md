@@ -12,7 +12,12 @@
   <img src="https://img.shields.io/badge/Testcontainers-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
 </p>
 
-<p>
+<p align="center">
+  <b>🔗 Homepage / Demo:</b> <a href="https://hooneyg.github.io/event-streaming-lab">hooneyg.github.io/event-streaming-lab</a><br>
+  <b>🧪 Scenario Guide:</b> <a href="file:///d:/works/20260513/event-streaming-lab/examples/event_scenarios.md">examples/event_scenarios.md</a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" />
   <img src="https://img.shields.io/badge/Coverage-95%25-brightgreen?style=flat-square" />
   <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square&logo=githubactions&logoColor=white" />

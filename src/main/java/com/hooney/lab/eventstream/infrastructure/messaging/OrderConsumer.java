@@ -50,6 +50,10 @@ public class OrderConsumer {
 
         // 2. 비즈니스 로직 실행 (실제 서비스에서는 타 도메인 상태 변경이나 외부 API 호출 등이 일어남)
         log.info(">>>> [OrderConsumer] 비즈니스 로직 수행 (Payload: {})", record.value());
+        if ("INVALID_PAYLOAD".equals(record.value())) {
+            log.error(">>>> [OrderConsumer] 비정상 페이로드 감지 - 예외를 던져 재시도를 유도합니다.");
+            throw new IllegalArgumentException("Invalid payload error");
+        }
 
         // 3. 처리 완료 이력 기록: 동일한 트랜잭션 내에서 처리 완료 사실을 영속화
         processedEventRepository.save(ProcessedEvent.of(eventId));
