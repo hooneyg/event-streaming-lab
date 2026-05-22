@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-  <b>🔗 Homepage / Demo:</b> <a href="https://hooneyg.github.io/event-streaming-lab">hooneyg.github.io/event-streaming-lab</a><br>
-  <b>🧪 Scenario Guide:</b> <a href="file:///d:/works/20260513/event-streaming-lab/examples/event_scenarios.md">examples/event_scenarios.md</a>
+  <b>🔗 Homepage / Demo:</b> <a href="https://hooneyg.github.io">hooneyg.github.io</a><br>
+  <b>🧪 Scenario Guide:</b> <a href="./examples/event_scenarios.md">examples/event_scenarios.md</a>
 </p>
 
 <p align="center">
